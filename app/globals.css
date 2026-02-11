@@ -1,26 +1,176 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f6faf6;
+  --bg-alt: #ffffff;
+  --text: #1d2320;
+  --muted: #5f6a64;
+  --line: #dbe6dd;
+  --primary: #58bc6a;
+  --primary-deep: #2d8e49;
+  --accent: #c98fc7;
+  --accent-soft: #f4e9f3;
+  --card-shadow: 0 18px 36px -30px rgba(27, 45, 30, 0.5);
+}
+
+[data-theme="dark"] {
+  --bg: #101714;
+  --bg-alt: #18201c;
+  --text: #ebf3ed;
+  --muted: #b1beb7;
+  --line: #2d3a33;
+  --primary: #73d585;
+  --primary-deep: #9de5a9;
+  --accent: #e2a4dd;
+  --accent-soft: #332738;
+  --card-shadow: 0 26px 50px -36px rgba(0, 0, 0, 0.75);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --font-sans: var(--font-manrope);
+  --font-display: var(--font-sora);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: radial-gradient(circle at 12% 10%, #def2e0 0%, transparent 34%),
+    radial-gradient(circle at 90% 6%, #f6e7f3 0%, transparent 26%), var(--bg);
+  color: var(--text);
+  font-family: var(--font-manrope), sans-serif;
+}
+
+[data-theme="dark"] body {
+  background: radial-gradient(circle at 12% 10%, #1b3220 0%, transparent 34%),
+    radial-gradient(circle at 90% 6%, #322337 0%, transparent 26%), var(--bg);
+}
+
+.container-main {
+  width: min(1140px, 92vw);
+  margin-inline: auto;
+}
+
+.section-band {
+  padding-block: clamp(3.3rem, 7vw, 6.2rem);
+}
+
+.section-band-soft {
+  background: color-mix(in oklab, var(--bg-alt) 76%, transparent 24%);
+  border-block: 1px solid color-mix(in oklab, var(--line) 85%, transparent 15%);
+}
+
+.section-title {
+  font-family: var(--font-sora), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.surface {
+  background: var(--bg-alt);
+  border: 1px solid var(--line);
+  box-shadow: var(--card-shadow);
+}
+
+.frost {
+  background: color-mix(in oklab, var(--bg-alt) 72%, transparent 28%);
+  border: 1px solid color-mix(in oklab, var(--line) 86%, white 14%);
+  backdrop-filter: blur(10px);
+}
+
+.pill {
+  border: 1px solid var(--line);
+  background: color-mix(in oklab, var(--bg-alt) 86%, var(--accent-soft) 14%);
+  border-radius: 999px;
+  padding: 0.34rem 0.8rem;
+  font-size: 0.83rem;
+  color: var(--muted);
+}
+
+.line-card {
+  border: 1px solid var(--line);
+  background: color-mix(in oklab, var(--bg-alt) 95%, transparent 5%);
+  box-shadow: 0 12px 28px -24px rgba(10, 24, 14, 0.45);
+}
+
+[data-theme="dark"] .line-card {
+  box-shadow: 0 14px 30px -24px rgba(0, 0, 0, 0.72);
+}
+
+.accent-rule {
+  height: 2px;
+  width: 72px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+.hero-visual {
+  background-image: linear-gradient(
+      135deg,
+      rgba(6, 24, 10, 0.28),
+      rgba(24, 10, 31, 0.22)
+    ),
+    radial-gradient(circle at 20% 20%, #6cc77b 0%, transparent 45%),
+    radial-gradient(circle at 80% 10%, #d59bd1 0%, transparent 35%),
+    linear-gradient(180deg, #2a3c2f, #1b2620);
+}
+
+.deep-shadow {
+  box-shadow: 0 22px 45px -30px rgba(12, 26, 16, 0.6);
+}
+
+[data-theme="dark"] .deep-shadow {
+  box-shadow: 0 24px 48px -30px rgba(0, 0, 0, 0.82);
+}
+
+.logo-marquee {
+  overflow: hidden;
+  position: relative;
+}
+
+.logo-track {
+  display: flex;
+  width: max-content;
+  gap: 0.9rem;
+  animation: marquee 34s linear infinite;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.logo-pill {
+  border: 1px solid var(--line);
+  background: color-mix(in oklab, var(--bg-alt) 95%, transparent 5%);
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  color: var(--muted);
+  font-size: 0.83rem;
+  white-space: nowrap;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 640ms ease, transform 640ms ease;
+}
+
+.reveal.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-track {
+    animation: none;
+  }
+
+  .reveal,
+  .reveal.show {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
