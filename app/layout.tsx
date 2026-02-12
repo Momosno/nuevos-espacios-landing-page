@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
-import { Manrope, Sora } from "next/font/google";
+import { Baloo_2 } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/lib/site";
 
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-});
-
-const sora = Sora({
-  variable: "--font-sora",
+const baloo_2 = Baloo_2({
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-baloo-2",
   subsets: ["latin"],
 });
 
@@ -25,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${manrope.variable} ${sora.variable} antialiased`}>
+      <body className={`${baloo_2.className} ${baloo_2.variable} antialiased`}>
         {children}
       </body>
     </html>

@@ -9,7 +9,7 @@ export const siteConfig = {
 export const contactConfig = {
   whatsappNumber: "5491139359554",
   phoneDisplay: "+54 9 11 3935-9554",
-  email: "info@nuevosespacios.com.ar",
+  email: process.env.EMAIL_ADDRESS,
   location: "Villa Pueyrredon, CABA, Buenos Aires",
 } as const;
 
@@ -98,6 +98,20 @@ export const reviews = [
     rating: 5,
     summary: "Servicio profesional",
     body: "Desde el primer contacto hasta la instalacion todo fue claro. Materiales muy buenos y terminaciones excelentes.",
+    source: "Google",
+  },
+  {
+    author: "Luciana M.",
+    rating: 5,
+    summary: "Muy buena experiencia",
+    body: "Nos ayudaron a elegir la combinacion correcta para el patio. El resultado quedo prolijo y con gran impacto visual.",
+    source: "Google",
+  },
+  {
+    author: "Diego R.",
+    rating: 5,
+    summary: "Atencion rapida y clara",
+    body: "Pedi presupuesto por WhatsApp y respondieron enseguida. La instalacion fue ordenada y termino en el tiempo acordado.",
     source: "Google",
   },
 ] as const;

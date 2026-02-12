@@ -1,31 +1,62 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import {
-  benefits,
-  clients,
-  contactConfig,
-  portfolio,
-  products,
-  reviews,
-} from "@/lib/site";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { benefits, clients, contactConfig, products, reviews } from "@/lib/site";
 
-type Theme = "light" | "dark";
+type GalleryTab = "jardines" | "plantas" | "cesped";
 
-function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "light";
-  const stored = window.localStorage.getItem("ne-theme");
-  if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-}
+const galleryTabs = [
+  {
+    key: "jardines" as const,
+    label: "Jardines verticales",
+    images: [
+      { name: "Terraza Urbana", src: "/1.jpeg", size: "tall" as const },
+      { name: "Lobby Corporativo", src: "/2.jpeg", size: "wide" as const },
+      { name: "Patio Moderno", src: "/3.jpeg", size: "medium" as const },
+      { name: "Recepcion Comercial", src: "/4.jpg", size: "tall" as const },
+    ],
+  },
+  {
+    key: "plantas" as const,
+    label: "Plantas artificiales",
+    images: [
+      { name: "Showroom Verde", src: "/5.jpg", size: "wide" as const },
+      { name: "Ingreso Comercial", src: "/6.jpeg", size: "medium" as const },
+      { name: "Pasillo Decorado", src: "/7.jpeg", size: "tall" as const },
+      { name: "Estar Moderno", src: "/8.jpeg", size: "medium" as const },
+    ],
+  },
+  {
+    key: "cesped" as const,
+    label: "Cesped sintetico",
+    images: [
+      { name: "Balcon Privado", src: "/9.jpeg", size: "wide" as const },
+      { name: "Terraza Familiar", src: "/10.jpeg", size: "tall" as const },
+      { name: "Zona Recreativa", src: "/image.png", size: "medium" as const },
+      { name: "Hall de Edificio", src: "/2.jpeg", size: "medium" as const },
+    ],
+  },
+];
 
-function imageTone(tone: "green" | "pink" | "violet") {
-  if (tone === "green") return "from-emerald-300/75 to-green-700/80";
-  if (tone === "pink") return "from-rose-200/75 to-pink-700/85";
-  return "from-violet-200/75 to-fuchsia-700/85";
-}
+const productImages = ["/3.jpeg", "/4.jpeg", "/6.jpeg"] as const;
+
+const extraInfo = [
+  {
+    title: "Instalacion en 24/48 hs",
+    brief: "Planificacion y montaje rapido en proyectos de CABA y GBA.",
+    body: "Coordinamos visita, propuesta y agenda de instalacion para reducir tiempos muertos del espacio comercial o residencial.",
+  },
+  {
+    title: "Materiales UV y lavables",
+    brief: "Terminaciones resistentes para interior y exterior cubierto.",
+    body: "Trabajamos paneles y plantas artificiales con buena durabilidad visual, faciles de limpiar y con reposicion por modulo.",
+  },
+  {
+    title: "Diseno por estilo",
+    brief: "Opciones modernas, tropicales y minimalistas.",
+    body: "Armamos combinaciones de volumen y textura segun tu objetivo: fondo para marca, ambientacion de venta o espacio relajado.",
+  },
+] as const;
 
 function imageHeight(size: "tall" | "medium" | "wide") {
   if (size === "tall") return "h-[26rem]";
@@ -33,51 +64,39 @@ function imageHeight(size: "tall" | "medium" | "wide") {
   return "h-[21rem]";
 }
 
-const heroImage = "/image00022.jpeg";
-const productImages = ["/3.jpeg", "/4.jpeg", "/6.jpeg"] as const;
-const portfolioImages = [
-  "/image00006.jpeg",
-  "/image00022.jpeg",
-  "/image00029.jpeg",
-  "/image00030.jpeg",
-  "/3.jpeg",
-  "/4.jpeg",
-  "/6.jpeg",
-] as const;
+function getClientTheme(): "light" | "dark" {
+  if (typeof window === "undefined") return "light";
+  const stored = window.localStorage.getItem("ne-theme");
+  if (stored === "light" || stored === "dark") return stored;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
 
 export default function Home() {
-  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [isReady, setIsReady] = useState(false);
+  const [activeTab, setActiveTab] = useState<GalleryTab>("jardines");
   const [galleryModalIndex, setGalleryModalIndex] = useState<number | null>(null);
   const [reviewModalIndex, setReviewModalIndex] = useState<number | null>(null);
+  const [infoModalIndex, setInfoModalIndex] = useState<number | null>(null);
+  const didInitTheme = useRef(false);
 
   useEffect(() => {
+    const nextTheme = getClientTheme();
+    setTheme(nextTheme);
+    document.documentElement.setAttribute("data-theme", nextTheme);
+    window.localStorage.setItem("ne-theme", nextTheme);
+    didInitTheme.current = true;
+    setIsReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!didInitTheme.current) return;
     document.documentElement.setAttribute("data-theme", theme);
     window.localStorage.setItem("ne-theme", theme);
   }, [theme]);
 
-  useEffect(() => {
-    const items = document.querySelectorAll<HTMLElement>("[data-reveal]");
-    if (!items.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("show");
-            observer.unobserve(entry.target);
-          }
-        }
-      },
-      { threshold: 0.16 }
-    );
-
-    for (const item of items) {
-      item.classList.add("reveal");
-      observer.observe(item);
-    }
-
-    return () => observer.disconnect();
-  }, []);
+  const selectedTab = galleryTabs.find((tab) => tab.key === activeTab) ?? galleryTabs[0];
+  const marqueeClients = [...clients, ...clients];
 
   const whatsappHref = useMemo(() => {
     const message = encodeURIComponent(
@@ -86,17 +105,33 @@ export default function Home() {
     return `https://wa.me/${contactConfig.whatsappNumber}?text=${message}`;
   }, []);
 
-  const marqueeClients = [...clients, ...clients];
+  const baseText = theme === "dark" ? "text-zinc-100" : "text-zinc-900";
+  const mutedText = theme === "dark" ? "text-zinc-300" : "text-zinc-700";
+  const panelBorder = theme === "dark" ? "border-white/15" : "border-black/10";
+  const glassPanel =
+    theme === "dark"
+      ? "border-white/15 bg-white/10 backdrop-blur-xl"
+      : "border-black/10 bg-white/60 backdrop-blur-xl";
+  const card =
+    theme === "dark"
+      ? "border-white/15 bg-black/35 backdrop-blur-md"
+      : "border-black/10 bg-white/80 backdrop-blur-md";
 
   return (
-    <div className="pb-16">
-      <header className="container-main sticky top-4 z-30 pt-4">
-        <div className="frost rounded-2xl px-4 py-3 md:px-6">
+    <div
+      className={`relative min-h-screen overflow-x-clip ${baseText} transition-all duration-1000 ${
+        isReady ? "blur-0 opacity-100" : "blur-md opacity-70"
+      }`}
+    >
+      <div className="fixed inset-0 -z-30 bg-[url('/website_background_mobile.png')] bg-cover bg-center bg-no-repeat md:bg-[url('/website_background_desktop.png')]" />
+      <div className="fixed inset-0 -z-20 bg-black/55" />
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_18%_20%,rgba(124,197,136,0.08),transparent_42%),radial-gradient(circle_at_86%_12%,rgba(237,178,233,0.08),transparent_38%)]" />
+
+      <header className="sticky top-4 z-30 mx-auto w-[min(1140px,92vw)] pt-4">
+        <div className={`rounded-2xl border px-4 py-3 md:px-6 ${glassPanel}`}>
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs tracking-[0.22em] text-[var(--muted)]">
-                NUEVOS ESPACIOS
-              </p>
+              <p className={`text-xs tracking-[0.22em] ${mutedText}`}>NUEVOS ESPACIOS</p>
               <p className="mt-1 text-sm font-semibold">CABA, Buenos Aires</p>
             </div>
             <div className="flex items-center gap-2">
@@ -104,14 +139,14 @@ export default function Home() {
                 href={whatsappHref}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+                className="rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
               >
                 Presupuesto
               </a>
               <button
                 type="button"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="line-card rounded-full px-3 py-2 text-sm"
+                className={`rounded-full border px-3 py-2 text-sm ${card}`}
               >
                 {theme === "dark" ? "Modo dia" : "Modo noche"}
               </button>
@@ -121,53 +156,40 @@ export default function Home() {
       </header>
 
       <main className="mt-8">
-        <section className="section-band">
-          <div className="container-main grid items-stretch gap-8 md:grid-cols-[1.02fr_0.98fr]">
-            <div data-reveal className="space-y-5">
-              <span className="pill inline-flex">Jardines verticales artificiales</span>
-              <h1 className="section-title text-4xl leading-tight font-semibold md:text-6xl">
-                Diseno verde para espacios que venden mejor
-              </h1>
-              <p className="max-w-xl text-base leading-relaxed text-[var(--muted)] md:text-lg">
-                Creamos paredes verdes modernas con instalacion profesional en
-                CABA y GBA. Tambien trabajamos plantas artificiales y cesped
-                sintetico para proyectos residenciales y comerciales.
-              </p>
-              <div className="accent-rule" />
-              <div className="flex flex-wrap gap-3">
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-full bg-[var(--primary)] px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110"
-                >
-                  Pedir presupuesto
-                </a>
-                <a
-                  href="#portfolio"
-                  className="line-card rounded-full px-6 py-3 text-sm font-semibold"
-                >
-                  Ver portfolio
-                </a>
-              </div>
-            </div>
-            <div data-reveal className="relative overflow-hidden rounded-3xl hero-visual deep-shadow p-5 text-white">
-              <img
-                src={heroImage}
-                alt="Proyecto destacado de jardin vertical"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/34" />
-              <div className="relative z-10">
-                <p className="text-xs tracking-[0.15em] text-white/80">PROYECTO DESTACADO</p>
-                <h2 className="section-title mt-2 text-3xl font-semibold leading-tight">
-                  Jardin vertical combinado para local comercial
-                </h2>
-                <div className="mt-5 grid gap-2 text-sm">
-                  <div className="frost rounded-xl px-3 py-2">Cobertura: CABA + GBA</div>
-                  <div className="frost rounded-xl px-3 py-2">Instalacion prolija y rapida</div>
-                  <div className="frost rounded-xl px-3 py-2">
-                    Soluciones para interior y exterior
+        <section className="py-[clamp(3.3rem,7vw,6.2rem)]">
+          <div className="mx-auto w-[min(1140px,92vw)]">
+            <div className={`relative overflow-hidden rounded-3xl border px-5 py-16 md:px-10 md:py-24 ${panelBorder}`}>
+              <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(8,19,12,0.7),rgba(18,12,21,0.55)),radial-gradient(circle_at_18%_50%,rgba(113,194,126,0.42),transparent_48%),radial-gradient(circle_at_86%_20%,rgba(204,142,198,0.3),transparent_40%)]" />
+              <div className="relative grid md:grid-cols-2">
+                <div />
+                <div className="space-y-5 text-center md:text-right">
+                  <span className={`inline-flex rounded-full border px-3 py-1 text-sm ${card}`}>
+                    Jardines verticales artificiales
+                  </span>
+                  <h1 className="text-5xl font-semibold leading-tight text-white md:text-7xl">
+                    Nuevos Espacios
+                  </h1>
+                  <p className="text-base leading-relaxed text-white/85 md:ml-auto md:max-w-xl md:text-lg">
+                    Creamos paredes verdes modernas con instalacion profesional en CABA y GBA.
+                    Tambien trabajamos plantas artificiales y cesped sintetico para proyectos
+                    residenciales y comerciales.
+                  </p>
+                  <div className="h-[2px] w-[72px] bg-gradient-to-r from-emerald-500 to-fuchsia-300 md:ml-auto" />
+                  <div className="flex flex-wrap justify-center gap-3 md:justify-end">
+                    <a
+                      href={whatsappHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110"
+                    >
+                      Pedir presupuesto
+                    </a>
+                    <a
+                      href="#gallery"
+                      className={`rounded-full border px-6 py-3 text-sm font-semibold ${card}`}
+                    >
+                      Ver galeria
+                    </a>
                   </div>
                 </div>
               </div>
@@ -175,36 +197,48 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="section-band section-band-soft">
-          <div className="container-main">
-            <div data-reveal className="mb-6">
-              <p className="text-xs tracking-[0.18em] text-[var(--muted)]">VENTAJAS</p>
-              <h2 className="section-title mt-2 text-3xl font-semibold">
+        <section className="relative border-y border-white/15 bg-black/25 py-[clamp(3.3rem,7vw,6.2rem)] backdrop-blur-sm">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-white/[0.04] to-black/25" />
+          <div className="relative mx-auto w-[min(1140px,92vw)]">
+            <div className="mb-6">
+              <p className={`text-xs tracking-[0.18em] ${mutedText}`}>VENTAJAS</p>
+              <h2 className="mt-2 text-3xl font-semibold">
                 Estetica limpia, impacto inmediato y cero mantenimiento complejo
               </h2>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               {benefits.map((benefit) => (
-                <article key={benefit.title} data-reveal className="line-card rounded-2xl p-5">
-                  <h3 className="section-title text-2xl font-semibold">{benefit.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-                    {benefit.description}
-                  </p>
+                <article key={benefit.title} className={`rounded-2xl border p-5 ${card}`}>
+                  <h3 className="text-2xl font-semibold">{benefit.title}</h3>
+                  <p className={`mt-3 text-sm leading-relaxed ${mutedText}`}>{benefit.description}</p>
+                </article>
+              ))}
+            </div>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              {extraInfo.map((item, index) => (
+                <article key={item.title} className={`rounded-2xl border p-5 ${card}`}>
+                  <h3 className="text-2xl font-semibold">{item.title}</h3>
+                  <p className={`mt-3 text-sm leading-relaxed ${mutedText}`}>{item.brief}</p>
+                  <button
+                    type="button"
+                    onClick={() => setInfoModalIndex(index)}
+                    className={`mt-4 rounded-full border px-3 py-1 text-sm ${card}`}
+                  >
+                    Ver detalle
+                  </button>
                 </article>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="section-band">
-          <div className="container-main">
-            <div data-reveal className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <section className="py-[clamp(3.3rem,7vw,6.2rem)]">
+          <div className="mx-auto w-[min(1140px,92vw)]">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-xs tracking-[0.18em] text-[var(--muted)]">PRESUPUESTO</p>
-                <h2 className="section-title mt-2 text-3xl font-semibold">
-                  Asesoria inicial sin costo
-                </h2>
-                <p className="mt-2 text-[var(--muted)]">
+                <p className={`text-xs tracking-[0.18em] ${mutedText}`}>PRESUPUESTO</p>
+                <h2 className="mt-2 text-3xl font-semibold">Asesoria inicial sin costo</h2>
+                <p className={`mt-2 ${mutedText}`}>
                   Te recomendamos una solucion real segun tu espacio, estilo y uso.
                 </p>
               </div>
@@ -212,46 +246,67 @@ export default function Home() {
                 href={whatsappHref}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110"
+                className="rounded-full bg-fuchsia-400 px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110"
               >
                 Escribir por WhatsApp
               </a>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               {products.map((product, index) => (
-                <article
-                  key={product.title}
-                  data-reveal
-                  className="line-card deep-shadow overflow-hidden rounded-2xl p-5 transition duration-200 hover:-translate-y-1"
-                >
-                  <img
-                    src={productImages[index % productImages.length]}
-                    alt={product.title}
-                    className="mb-4 h-36 w-full rounded-xl object-cover"
-                  />
-                  <span className="pill inline-flex">{product.badge}</span>
-                  <h3 className="section-title mt-3 text-2xl font-semibold">{product.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-                    {product.description}
-                  </p>
+                <article key={product.title} className={`rounded-2xl border p-5 ${glassPanel}`}>
+                  <a
+                    href="#gallery"
+                    onClick={() =>
+                      setActiveTab(index === 0 ? "jardines" : index === 1 ? "plantas" : "cesped")
+                    }
+                  >
+                    <img
+                      src={productImages[index % productImages.length]}
+                      alt={product.title}
+                      className="mb-4 h-64 w-full rounded-xl object-cover"
+                    />
+                  </a>
+                  <span className={`inline-flex rounded-full border px-3 py-1 text-sm ${card}`}>
+                    {product.badge}
+                  </span>
+                  <h3 className="mt-3 text-2xl font-semibold">{product.title}</h3>
+                  <p className={`mt-3 text-sm leading-relaxed ${mutedText}`}>{product.description}</p>
+                  <a
+                    href="#gallery"
+                    onClick={() =>
+                      setActiveTab(index === 0 ? "jardines" : index === 1 ? "plantas" : "cesped")
+                    }
+                    className={`mt-4 inline-flex rounded-full border px-3 py-1 text-sm ${card}`}
+                  >
+                    Ver galeria de este producto
+                  </a>
                 </article>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="section-band section-band-soft">
-          <div className="container-main">
-            <div data-reveal className="mb-6">
-              <p className="text-xs tracking-[0.18em] text-[var(--muted)]">CLIENTES</p>
-              <h2 className="section-title mt-2 text-3xl font-semibold">
-                Marcas y espacios que confian
-              </h2>
+        <section className="border-y border-white/15 bg-black/25 py-[clamp(3.3rem,7vw,6.2rem)] backdrop-blur-sm">
+          <div className="mx-auto w-[min(1140px,92vw)]">
+            <div className="mb-6">
+              <p className={`text-xs tracking-[0.18em] ${mutedText}`}>CLIENTES</p>
+              <h2 className="mt-2 text-3xl font-semibold">Marcas y espacios que confian</h2>
             </div>
-            <div data-reveal className="logo-marquee">
-              <div className="logo-track">
+            <div className="overflow-hidden">
+              <div className="flex w-max animate-[marquee_34s_linear_infinite] gap-3 [@keyframes_marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}]">
                 {marqueeClients.map((client, index) => (
-                  <span key={`${client}-${index}`} className="logo-pill">
+                  <span
+                    key={`${client}-${index}`}
+                    className={`grid justify-items-center gap-1 rounded-2xl border px-4 py-3 text-center text-sm ${glassPanel}`}
+                  >
+                    <span className="grid h-8 w-8 place-items-center rounded-full border border-white/30 bg-gradient-to-br from-emerald-400 to-fuchsia-400 text-[11px] font-bold text-white">
+                      {client
+                        .split(" ")
+                        .map((w) => w[0])
+                        .join("")
+                        .slice(0, 2)
+                        .toUpperCase()}
+                    </span>
                     {client}
                   </span>
                 ))}
@@ -260,35 +315,47 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="portfolio" className="section-band">
-          <div className="container-main">
-            <div data-reveal className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <section id="gallery" className="py-[clamp(3.3rem,7vw,6.2rem)]">
+          <div className="mx-auto w-[min(1140px,92vw)]">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="text-xs tracking-[0.18em] text-[var(--muted)]">PORTFOLIO</p>
-                <h2 className="section-title mt-2 text-3xl font-semibold">
-                  Galeria de trabajos
-                </h2>
+                <p className={`text-xs tracking-[0.18em] ${mutedText}`}>GALERIA</p>
+                <h2 className="mt-2 text-3xl font-semibold">Galeria de trabajos</h2>
               </div>
-              <span className="pill">Layout irregular, no carrusel</span>
+              <span className={`rounded-full border px-3 py-1 text-sm ${card}`}>Tabs por producto</span>
+            </div>
+            <div className="mb-6 flex flex-wrap gap-2">
+              {galleryTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`rounded-full border px-4 py-2 text-sm transition ${
+                    activeTab === tab.key
+                      ? "border-emerald-500 bg-emerald-500 text-white"
+                      : theme === "dark"
+                        ? "border-white/20 bg-black/35 text-zinc-100 hover:bg-black/55"
+                        : "border-black/15 bg-white/75 text-zinc-900 hover:bg-white"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
             <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
-              {portfolio.map((item, index) => (
+              {selectedTab.images.map((item, index) => (
                 <button
                   key={item.name}
                   type="button"
-                  data-reveal
                   onClick={() => setGalleryModalIndex(index)}
-                  className={`group relative mb-5 block w-full overflow-hidden rounded-2xl deep-shadow ${imageHeight(item.size)} text-left`}
+                  className={`group relative mb-5 block w-full overflow-hidden rounded-2xl ${imageHeight(
+                    item.size
+                  )} text-left`}
                 >
-                  <img
-                    src={portfolioImages[index % portfolioImages.length]}
-                    alt={item.name}
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                  <div className={`absolute inset-0 bg-gradient-to-br ${imageTone(item.tone)} mix-blend-multiply`} />
-                  <div className="absolute inset-0 bg-black/22 transition group-hover:bg-black/34" />
+                  <img src={item.src} alt={item.name} className="absolute inset-0 h-full w-full object-cover" />
+                  <div className="absolute inset-0 bg-black/25 transition group-hover:bg-black/35" />
                   <div className="absolute right-3 bottom-3 left-3 text-white">
-                    <p className="section-title text-lg font-semibold">{item.name}</p>
+                    <p className="text-lg font-semibold">{item.name}</p>
                   </div>
                 </button>
               ))}
@@ -296,21 +363,23 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="section-band section-band-soft">
-          <div className="container-main">
-            <div data-reveal className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <section className="border-y border-white/15 bg-black/25 py-[clamp(3.3rem,7vw,6.2rem)] backdrop-blur-sm">
+          <div className="mx-auto w-[min(1140px,92vw)]">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="text-xs tracking-[0.18em] text-[var(--muted)]">RESENAS</p>
-                <h2 className="section-title mt-2 text-3xl font-semibold">Resenas de Google</h2>
+                <p className={`text-xs tracking-[0.18em] ${mutedText}`}>RESENAS</p>
+                <h2 className="mt-2 text-3xl font-semibold">Resenas de Google</h2>
               </div>
-              <span className="pill">Frontend estatico, sin backend</span>
+              <span className={`rounded-full border px-3 py-1 text-sm ${card}`}>
+                Frontend estatico, sin backend
+              </span>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {reviews.map((review, index) => (
-                <article key={review.author} data-reveal className="line-card rounded-2xl p-5">
-                  <p className="text-sm tracking-[0.16em] text-amber-500">*****</p>
-                  <h3 className="section-title mt-2 text-2xl font-semibold">{review.summary}</h3>
-                  <p className="mt-3 max-h-16 overflow-hidden text-sm leading-relaxed text-[var(--muted)]">
+                <article key={review.author} className={`rounded-2xl border p-5 ${card}`}>
+                  <p className="text-sm tracking-[0.16em] text-amber-400">*****</p>
+                  <h3 className="mt-2 text-2xl font-semibold">{review.summary}</h3>
+                  <p className={`mt-3 max-h-16 overflow-hidden text-sm leading-relaxed ${mutedText}`}>
                     {review.body}
                   </p>
                   <div className="mt-4 flex items-center justify-between gap-3">
@@ -318,7 +387,7 @@ export default function Home() {
                     <button
                       type="button"
                       onClick={() => setReviewModalIndex(index)}
-                      className="pill"
+                      className={`rounded-full border px-3 py-1 text-sm ${card}`}
                     >
                       Ver completa
                     </button>
@@ -329,41 +398,47 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="section-band">
-          <div className="container-main">
-            <div data-reveal className="mb-6">
-              <p className="text-xs tracking-[0.18em] text-[var(--muted)]">CONTACTO</p>
-              <h2 className="section-title mt-2 text-3xl font-semibold">
-                Hablemos de tu proyecto
-              </h2>
+        <section className="py-[clamp(3.3rem,7vw,6.2rem)]">
+          <div className="mx-auto w-[min(1140px,92vw)]">
+            <div className="mb-6">
+              <p className={`text-xs tracking-[0.18em] ${mutedText}`}>CONTACTO</p>
+              <h2 className="mt-2 text-3xl font-semibold">Hablemos de tu proyecto</h2>
             </div>
-            <div className="grid gap-5 md:grid-cols-2">
-              <div data-reveal className="space-y-3">
-                <p className="text-sm text-[var(--muted)]">Telefono</p>
-                <p className="text-lg font-semibold">{contactConfig.phoneDisplay}</p>
-                <p className="text-sm text-[var(--muted)]">Email</p>
-                <p className="text-lg font-semibold">{contactConfig.email}</p>
-                <p className="text-sm text-[var(--muted)]">Ubicacion</p>
-                <p className="text-lg font-semibold">{contactConfig.location}</p>
+            <div className="mx-auto grid max-w-3xl gap-5">
+              <div className="grid gap-4 text-center md:grid-cols-3 md:text-left">
+                <div>
+                  <p className={`text-sm ${mutedText}`}>Telefono</p>
+                  <p className="text-lg font-semibold">{contactConfig.phoneDisplay}</p>
+                </div>
+                <div>
+                  <p className={`text-sm ${mutedText}`}>Email</p>
+                  <p className="text-lg font-semibold">{contactConfig.email}</p>
+                </div>
+                <div>
+                  <p className={`text-sm ${mutedText}`}>Ubicacion</p>
+                  <p className="text-lg font-semibold">{contactConfig.location}</p>
+                </div>
               </div>
-              <form data-reveal className="line-card grid gap-3 rounded-2xl p-4">
+              <form className={`grid gap-3 rounded-3xl border p-6 md:p-8 ${glassPanel}`}>
+                <h3 className="text-center text-2xl font-semibold">Recibi asesoramiento personalizado</h3>
+                <p className="text-center text-sm text-white/80">Completalo y te respondemos por WhatsApp.</p>
                 <input
                   placeholder="Nombre"
-                  className="rounded-xl border border-[var(--line)] bg-[var(--bg-alt)] px-3 py-2"
+                  className="rounded-xl border border-white/20 bg-black/30 px-3 py-2 text-white placeholder:text-white/65"
                 />
                 <input
                   placeholder="Telefono"
-                  className="rounded-xl border border-[var(--line)] bg-[var(--bg-alt)] px-3 py-2"
+                  className="rounded-xl border border-white/20 bg-black/30 px-3 py-2 text-white placeholder:text-white/65"
                 />
                 <textarea
                   placeholder="Contanos que espacio queres transformar"
-                  className="min-h-28 rounded-xl border border-[var(--line)] bg-[var(--bg-alt)] px-3 py-2"
+                  className="min-h-28 rounded-xl border border-white/20 bg-black/30 px-3 py-2 text-white placeholder:text-white/65"
                 />
                 <a
                   href={whatsappHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-full bg-[var(--primary)] px-4 py-3 text-center text-sm font-semibold text-white transition hover:brightness-110"
+                  className="rounded-full bg-emerald-500 px-4 py-3 text-center text-sm font-semibold text-white transition hover:brightness-110"
                 >
                   Enviar por WhatsApp
                 </a>
@@ -375,31 +450,39 @@ export default function Home() {
 
       {galleryModalIndex !== null && (
         <div className="fixed inset-0 z-40 grid place-items-center bg-black/65 p-4">
-          <div className="surface w-full max-w-2xl rounded-3xl p-6">
-            <h3 className="section-title text-3xl font-semibold">
-              {portfolio[galleryModalIndex].name}
-            </h3>
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              Reemplazar este bloque por foto real optimizada cuando la tengas lista.
+          <div className={`w-full max-w-2xl rounded-3xl border p-6 ${card}`}>
+            <h3 className="text-3xl font-semibold">{selectedTab.images[galleryModalIndex].name}</h3>
+            <p className={`mt-2 text-sm ${mutedText}`}>
+              Proyecto ejemplo de {selectedTab.label.toLowerCase()}.
             </p>
-            <div
-              className="relative mt-5 h-80 overflow-hidden rounded-2xl"
-            >
+            <div className="relative mt-5 h-80 overflow-hidden rounded-2xl">
               <img
-                src={portfolioImages[galleryModalIndex % portfolioImages.length]}
-                alt={portfolio[galleryModalIndex].name}
+                src={selectedTab.images[galleryModalIndex].src}
+                alt={selectedTab.images[galleryModalIndex].name}
                 className="h-full w-full object-cover"
               />
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${imageTone(
-                  portfolio[galleryModalIndex].tone
-                )} mix-blend-multiply`}
-              />
+              <div className="absolute inset-0 bg-black/18" />
             </div>
             <button
               type="button"
               onClick={() => setGalleryModalIndex(null)}
-              className="line-card mt-5 rounded-full px-4 py-2 text-sm"
+              className={`mt-5 rounded-full border px-4 py-2 text-sm ${card}`}
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {infoModalIndex !== null && (
+        <div className="fixed inset-0 z-40 grid place-items-center bg-black/65 p-4">
+          <div className={`w-full max-w-xl rounded-3xl border p-6 ${card}`}>
+            <h3 className="text-3xl font-semibold">{extraInfo[infoModalIndex].title}</h3>
+            <p className={`mt-4 leading-relaxed ${mutedText}`}>{extraInfo[infoModalIndex].body}</p>
+            <button
+              type="button"
+              onClick={() => setInfoModalIndex(null)}
+              className={`mt-6 rounded-full border px-4 py-2 text-sm ${card}`}
             >
               Cerrar
             </button>
@@ -409,22 +492,18 @@ export default function Home() {
 
       {reviewModalIndex !== null && (
         <div className="fixed inset-0 z-40 grid place-items-center bg-black/65 p-4">
-          <div className="surface w-full max-w-xl rounded-3xl p-6">
-            <p className="text-sm tracking-[0.16em] text-amber-500">*****</p>
-            <h3 className="section-title mt-2 text-3xl font-semibold">
-              {reviews[reviewModalIndex].summary}
-            </h3>
-            <p className="mt-4 leading-relaxed text-[var(--muted)]">
-              {reviews[reviewModalIndex].body}
-            </p>
+          <div className={`w-full max-w-xl rounded-3xl border p-6 ${card}`}>
+            <p className="text-sm tracking-[0.16em] text-amber-400">*****</p>
+            <h3 className="mt-2 text-3xl font-semibold">{reviews[reviewModalIndex].summary}</h3>
+            <p className={`mt-4 leading-relaxed ${mutedText}`}>{reviews[reviewModalIndex].body}</p>
             <div className="mt-5 flex items-center justify-between">
               <p className="font-semibold">{reviews[reviewModalIndex].author}</p>
-              <p className="text-sm text-[var(--muted)]">{reviews[reviewModalIndex].source}</p>
+              <p className={`text-sm ${mutedText}`}>{reviews[reviewModalIndex].source}</p>
             </div>
             <button
               type="button"
               onClick={() => setReviewModalIndex(null)}
-              className="line-card mt-6 rounded-full px-4 py-2 text-sm"
+              className={`mt-6 rounded-full border px-4 py-2 text-sm ${card}`}
             >
               Cerrar
             </button>
