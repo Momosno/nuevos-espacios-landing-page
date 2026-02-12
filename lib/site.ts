@@ -9,7 +9,7 @@ export const siteConfig = {
 export const contactConfig = {
   whatsappNumber: "5491139359554",
   phoneDisplay: "+54 9 11 3935-9554",
-  email: process.env.EMAIL_ADDRESS,
+  mail: "info@nuevosespacios.com.ar",
   location: "Villa Pueyrredon, CABA, Buenos Aires",
 } as const;
 

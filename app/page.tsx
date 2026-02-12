@@ -10,12 +10,17 @@ const galleryTabs = [
     key: "jardines" as const,
     label: "Jardines verticales",
     images: [
-      { name: "Terraza Urbana", src: "/1.jpeg", size: "tall" as const },
-      { name: "Lobby Corporativo", src: "/2.jpeg", size: "wide" as const },
-      { name: "Patio Moderno", src: "/3.jpeg", size: "medium" as const },
-      { name: "Recepcion Comercial", src: "/4.jpg", size: "tall" as const },
+      { name: "Terraza Urbana", src: "/jardin_1.jpeg", size: "tall" as const },
+      { name: "Lobby Corporativo", src: "/jardin_2.jpeg", size: "wide" as const },
+      { name: "Patio Moderno", src: "/jardin_3.jpeg", size: "medium" as const },
+      { name: "Recepcion Comercial", src: "/jardin_4.jpeg", size: "tall" as const },
+      { name: "1", src: "/jardin_5.jpeg", size: "tall" as const },
+      { name: "2", src: "/jardin_6.jpg", size: "tall" as const },
+      { name: "3", src: "/jardin_7.jpg", size: "tall" as const },
+      { name: "4", src: "/jardin_8.jpeg", size: "tall" as const },
+      { name: "5", src: "/jardin_9.jpeg", size: "tall" as const },
     ],
-  },
+  },  
   {
     key: "plantas" as const,
     label: "Plantas artificiales",
@@ -30,15 +35,19 @@ const galleryTabs = [
     key: "cesped" as const,
     label: "Cesped sintetico",
     images: [
-      { name: "Balcon Privado", src: "/9.jpeg", size: "wide" as const },
-      { name: "Terraza Familiar", src: "/10.jpeg", size: "tall" as const },
-      { name: "Zona Recreativa", src: "/image.png", size: "medium" as const },
-      { name: "Hall de Edificio", src: "/2.jpeg", size: "medium" as const },
+      { name: "Balcon Privado", src: "/product_cesped_1.jpeg", size: "wide" as const },
+      { name: "Terraza Familiar", src: "/product_cesped_2.jpeg", size: "tall" as const },
+      { name: "Zona Recreativa", src: "/product_cesped_3.jpeg", size: "medium" as const },
+      { name: "1", src: "/product_cesped_4.jpeg", size: "medium" as const },
+      { name: "2", src: "/product_cesped_5.jpeg", size: "medium" as const },
+      { name: "3", src: "/product_cesped_6.jpeg", size: "medium" as const },
+      { name: "4", src: "/product_cesped_7.jpeg", size: "medium" as const },
+      { name: "5", src: "/product_cesped_8.jpeg", size: "medium" as const },
     ],
   },
 ];
 
-const productImages = ["/3.jpeg", "/4.jpeg", "/6.jpeg"] as const;
+const productImages = ["product_jardin.jpeg", "product_plantas.webp ", "product_cesped_1.jpeg"] as const;
 
 const extraInfo = [
   {
@@ -79,6 +88,7 @@ export default function Home() {
   const [reviewModalIndex, setReviewModalIndex] = useState<number | null>(null);
   const [infoModalIndex, setInfoModalIndex] = useState<number | null>(null);
   const didInitTheme = useRef(false);
+  const logosTrackRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const nextTheme = getClientTheme();
@@ -95,6 +105,35 @@ export default function Home() {
     window.localStorage.setItem("ne-theme", theme);
   }, [theme]);
 
+  useEffect(() => {
+    let frameId = 0;
+    let offset = 0;
+    let lastTime = 0;
+    const speed = 42; // px/sec
+
+    const tick = (time: number) => {
+      const track = logosTrackRef.current;
+      if (!track) {
+        frameId = requestAnimationFrame(tick);
+        return;
+      }
+
+      if (lastTime === 0) lastTime = time;
+      const dt = (time - lastTime) / 1000;
+      lastTime = time;
+
+      const halfWidth = track.scrollWidth / 2;
+      offset -= speed * dt;
+      if (Math.abs(offset) >= halfWidth) offset = 0;
+
+      track.style.transform = `translate3d(${offset}px, 0, 0)`;
+      frameId = requestAnimationFrame(tick);
+    };
+
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
+  }, []);
+
   const selectedTab = galleryTabs.find((tab) => tab.key === activeTab) ?? galleryTabs[0];
   const marqueeClients = [...clients, ...clients];
 
@@ -108,6 +147,10 @@ export default function Home() {
   const baseText = theme === "dark" ? "text-zinc-100" : "text-zinc-900";
   const mutedText = theme === "dark" ? "text-zinc-300" : "text-zinc-700";
   const panelBorder = theme === "dark" ? "border-white/15" : "border-black/10";
+  const heroShadow =
+    theme === "dark"
+      ? "shadow-[0_24px_58px_-24px_rgba(255,255,255,0.38)]"
+      : "shadow-[0_28px_60px_-28px_rgba(0,0,0,0.55)]";
   const glassPanel =
     theme === "dark"
       ? "border-white/15 bg-white/10 backdrop-blur-xl"
@@ -131,7 +174,7 @@ export default function Home() {
         <div className={`rounded-2xl border px-4 py-3 md:px-6 ${glassPanel}`}>
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className={`text-xs tracking-[0.22em] ${mutedText}`}>NUEVOS ESPACIOS</p>
+              <p className={`text-xs tracking-[0.22em] `}>NUEVOS ESPACIOS</p>
               <p className="mt-1 text-sm font-semibold">CABA, Buenos Aires</p>
             </div>
             <div className="flex items-center gap-2">
@@ -158,9 +201,18 @@ export default function Home() {
       <main className="mt-8">
         <section className="py-[clamp(3.3rem,7vw,6.2rem)]">
           <div className="mx-auto w-[min(1140px,92vw)]">
-            <div className={`relative overflow-hidden rounded-3xl border px-5 py-16 md:px-10 md:py-24 ${panelBorder}`}>
-              <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(8,19,12,0.7),rgba(18,12,21,0.55)),radial-gradient(circle_at_18%_50%,rgba(113,194,126,0.42),transparent_48%),radial-gradient(circle_at_86%_20%,rgba(204,142,198,0.3),transparent_40%)]" />
-              <div className="relative grid md:grid-cols-2">
+            <div
+              className={`relative overflow-hidden rounded-3xl border px-5 py-16 md:px-10 md:py-24 border-white/15 shadow-[0_24px_58px_-24px_rgba(255,255,255,0.38)]`}
+            >
+              <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(8,19,12,0.72),rgba(18,12,21,0.58)),radial-gradient(circle_at_18%_50%,rgba(113,194,126,0.38),transparent_48%),radial-gradient(circle_at_86%_20%,rgba(204,142,198,0.25),transparent_40%)]" />
+              <div className="absolute inset-y-0 left-0 w-1/2 overflow-hidden">
+                <img
+                  src="/hero.png"
+                  alt="Hero Nuevos Espacios"
+                  className="h-full w-full object-cover z-100"
+                />
+              </div>
+              <div className="relative z-10 grid md:grid-cols-2">
                 <div />
                 <div className="space-y-5 text-center md:text-right">
                   <span className={`inline-flex rounded-full border px-3 py-1 text-sm ${card}`}>
@@ -201,8 +253,8 @@ export default function Home() {
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-white/[0.04] to-black/25" />
           <div className="relative mx-auto w-[min(1140px,92vw)]">
             <div className="mb-6">
-              <p className={`text-xs tracking-[0.18em] ${mutedText}`}>VENTAJAS</p>
-              <h2 className="mt-2 text-3xl font-semibold">
+              <p className={`text-xs tracking-[0.18em] text-zinc-100`}>VENTAJAS</p>
+              <h2 className="mt-2 text-3xl font-semibold text-zinc-100">
                 Estetica limpia, impacto inmediato y cero mantenimiento complejo
               </h2>
             </div>
@@ -219,13 +271,13 @@ export default function Home() {
                 <article key={item.title} className={`rounded-2xl border p-5 ${card}`}>
                   <h3 className="text-2xl font-semibold">{item.title}</h3>
                   <p className={`mt-3 text-sm leading-relaxed ${mutedText}`}>{item.brief}</p>
-                  <button
+                  {/* <button
                     type="button"
                     onClick={() => setInfoModalIndex(index)}
                     className={`mt-4 rounded-full border px-3 py-1 text-sm ${card}`}
                   >
                     Ver detalle
-                  </button>
+                  </button> */}
                 </article>
               ))}
             </div>
@@ -236,9 +288,9 @@ export default function Home() {
           <div className="mx-auto w-[min(1140px,92vw)]">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className={`text-xs tracking-[0.18em] ${mutedText}`}>PRESUPUESTO</p>
-                <h2 className="mt-2 text-3xl font-semibold">Asesoria inicial sin costo</h2>
-                <p className={`mt-2 ${mutedText}`}>
+                <p className={`text-xs tracking-[0.18em] text-zinc-100`}>PRESUPUESTO</p>
+                <h2 className="mt-2 text-3xl font-semibold text-zinc-100">Asesoria inicial sin costo</h2>
+                <p className={`mt-2 text-zinc-100`}>
                   Te recomendamos una solucion real segun tu espacio, estilo y uso.
                 </p>
               </div>
@@ -246,7 +298,7 @@ export default function Home() {
                 href={whatsappHref}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-full bg-fuchsia-400 px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110"
+                className="rounded-full bg-pink-500 px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110"
               >
                 Escribir por WhatsApp
               </a>
@@ -289,11 +341,11 @@ export default function Home() {
         <section className="border-y border-white/15 bg-black/25 py-[clamp(3.3rem,7vw,6.2rem)] backdrop-blur-sm">
           <div className="mx-auto w-[min(1140px,92vw)]">
             <div className="mb-6">
-              <p className={`text-xs tracking-[0.18em] ${mutedText}`}>CLIENTES</p>
-              <h2 className="mt-2 text-3xl font-semibold">Marcas y espacios que confian</h2>
+              <p className={`text-xs tracking-[0.18em] text-zinc-100`}>CLIENTES</p>
+              <h2 className="mt-2 text-3xl font-semibold text-zinc-100">Marcas y espacios que confian</h2>
             </div>
             <div className="overflow-hidden">
-              <div className="flex w-max animate-[marquee_34s_linear_infinite] gap-3 [@keyframes_marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}]">
+              <div ref={logosTrackRef} className="flex w-max gap-3 will-change-transform">
                 {marqueeClients.map((client, index) => (
                   <span
                     key={`${client}-${index}`}
@@ -319,10 +371,10 @@ export default function Home() {
           <div className="mx-auto w-[min(1140px,92vw)]">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className={`text-xs tracking-[0.18em] ${mutedText}`}>GALERIA</p>
-                <h2 className="mt-2 text-3xl font-semibold">Galeria de trabajos</h2>
+                <p className={`text-xs tracking-[0.18em] text-zinc-100`}>GALERIA</p>
+                <h2 className="mt-2 text-3xl font-semibold text-zinc-100">Galeria de trabajos</h2>
               </div>
-              <span className={`rounded-full border px-3 py-1 text-sm ${card}`}>Tabs por producto</span>
+              {/* <span className={`rounded-full border px-3 py-1 text-sm ${card}`}>Tabs por producto</span> */}
             </div>
             <div className="mb-6 flex flex-wrap gap-2">
               {galleryTabs.map((tab) => (
@@ -334,7 +386,7 @@ export default function Home() {
                     activeTab === tab.key
                       ? "border-emerald-500 bg-emerald-500 text-white"
                       : theme === "dark"
-                        ? "border-white/20 bg-black/35 text-zinc-100 hover:bg-black/55"
+                        ? "border-white/20 bg-black/65 text-zinc-100 hover:bg-black/80"
                         : "border-black/15 bg-white/75 text-zinc-900 hover:bg-white"
                   }`}
                 >
@@ -367,17 +419,17 @@ export default function Home() {
           <div className="mx-auto w-[min(1140px,92vw)]">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className={`text-xs tracking-[0.18em] ${mutedText}`}>RESENAS</p>
-                <h2 className="mt-2 text-3xl font-semibold">Resenas de Google</h2>
+                <p className={`text-xs tracking-[0.18em] text-zinc-100`}>RESENAS</p>
+                <h2 className="mt-2 text-3xl font-semibold text-zinc-100">Reseñas de Google</h2>
               </div>
-              <span className={`rounded-full border px-3 py-1 text-sm ${card}`}>
+              {/* <span className={`rounded-full border px-3 py-1 text-sm ${card}`}>
                 Frontend estatico, sin backend
-              </span>
+              </span> */}
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {reviews.map((review, index) => (
                 <article key={review.author} className={`rounded-2xl border p-5 ${card}`}>
-                  <p className="text-sm tracking-[0.16em] text-amber-400">*****</p>
+                  <p className="text-lg tracking-[0.2em] text-amber-400">*****</p>
                   <h3 className="mt-2 text-2xl font-semibold">{review.summary}</h3>
                   <p className={`mt-3 max-h-16 overflow-hidden text-sm leading-relaxed ${mutedText}`}>
                     {review.body}
@@ -401,26 +453,26 @@ export default function Home() {
         <section className="py-[clamp(3.3rem,7vw,6.2rem)]">
           <div className="mx-auto w-[min(1140px,92vw)]">
             <div className="mb-6">
-              <p className={`text-xs tracking-[0.18em] ${mutedText}`}>CONTACTO</p>
-              <h2 className="mt-2 text-3xl font-semibold">Hablemos de tu proyecto</h2>
+              <p className={`text-xs tracking-[0.18em] text-zinc-100`}>CONTACTO</p>
+              <h2 className="mt-2 text-3xl font-semibold text-zinc-100">Hablemos de tu proyecto</h2>
             </div>
-            <div className="mx-auto grid max-w-3xl gap-5">
+            <div className="mx-auto grid w-[min(1140px,92vw)] gap-5">
               <div className="grid gap-4 text-center md:grid-cols-3 md:text-left">
                 <div>
-                  <p className={`text-sm ${mutedText}`}>Telefono</p>
-                  <p className="text-lg font-semibold">{contactConfig.phoneDisplay}</p>
+                  <p className={`text-sm  text-zinc-100`}>Telefono</p>
+                  <p className="text-lg font-semibold text-zinc-100">{contactConfig.phoneDisplay}</p>
+                </div>
+                <div> 
+                  <p className={`text-sm text-zinc-100`}>Email</p>
+                     <p className="text-lg font-semibold text-zinc-100">{contactConfig.mail}</p>
                 </div>
                 <div>
-                  <p className={`text-sm ${mutedText}`}>Email</p>
-                  <p className="text-lg font-semibold">{contactConfig.email}</p>
-                </div>
-                <div>
-                  <p className={`text-sm ${mutedText}`}>Ubicacion</p>
-                  <p className="text-lg font-semibold">{contactConfig.location}</p>
+                  <p className={`text-sm text-zinc-100`}>Ubicacion</p>
+                  <p className="text-lg font-semibold text-zinc-100">{contactConfig.location}</p>
                 </div>
               </div>
               <form className={`grid gap-3 rounded-3xl border p-6 md:p-8 ${glassPanel}`}>
-                <h3 className="text-center text-2xl font-semibold">Recibi asesoramiento personalizado</h3>
+                <h3 className="text-center text-2xl font-semibold text-zinc-100">Recibi asesoramiento personalizado</h3>
                 <p className="text-center text-sm text-white/80">Completalo y te respondemos por WhatsApp.</p>
                 <input
                   placeholder="Nombre"
