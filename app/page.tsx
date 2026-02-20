@@ -1,7 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type MouseEvent, useEffect, useMemo, useRef, useState } from "react";
 import { benefits, clients, contactConfig, products, reviews } from "@/lib/site";
+import type { IconType } from "react-icons";
+import {
+  FiClock,
+  FiCreditCard,
+  FiDroplet,
+  FiMapPin,
+  FiShield,
+  FiSun,
+  FiTrendingUp,
+  FiUsers,
+} from "react-icons/fi";
 
 type GalleryTab = "jardines" | "plantas" | "cesped";
 
@@ -49,21 +60,34 @@ const galleryTabs = [
 
 const productImages = ["product_jardin.jpeg", "product_plantas.webp ", "product_cesped_1.jpeg"] as const;
 
+const mainBenefitIcons: IconType[] = [FiSun, FiUsers, FiShield, FiCreditCard];
+const extraBenefitIcons: IconType[] = [FiClock, FiDroplet, FiTrendingUp, FiCreditCard, FiMapPin];
+
 const extraInfo = [
   {
     title: "Instalacion en 24/48 hs",
-    brief: "Planificacion y montaje rapido en proyectos de CABA y GBA.",
-    body: "Coordinamos visita, propuesta y agenda de instalacion para reducir tiempos muertos del espacio comercial o residencial.",
+    brief: "Planificamos la instalacion de forma agil y ordenada.",
+    body: "Coordinamos visita y agenda para que el trabajo se realice sin demoras innecesarias y con el menor impacto en tu rutina.",
   },
   {
     title: "Materiales UV y lavables",
-    brief: "Terminaciones resistentes para interior y exterior cubierto.",
-    body: "Trabajamos paneles y plantas artificiales con buena durabilidad visual, faciles de limpiar y con reposicion por modulo.",
+    brief: "Elegimos materiales resistentes y faciles de cuidar.",
+    body: "Seleccionamos paneles y plantas artificiales con buena terminacion visual, faciles de limpiar y con reposicion por modulo cuando hace falta.",
   },
   {
-    title: "Diseno por estilo",
-    brief: "Opciones modernas, tropicales y minimalistas.",
-    body: "Armamos combinaciones de volumen y textura segun tu objetivo: fondo para marca, ambientacion de venta o espacio relajado.",
+    title: "Diseno adaptado a tu estilo",
+    brief: "Definimos una propuesta que combine con tu espacio.",
+    body: "Armamos una seleccion de colores y texturas para que el resultado refleje la identidad del ambiente y se vea armonico desde el primer dia.",
+  },
+  {
+    title: "Opciones de pago claras",
+    brief: "Te ofrecemos alternativas para que avances con tranquilidad.",
+    body: "Contas con opciones en cuotas y beneficios por pago en efectivo o transferencia, segun el tipo de trabajo que necesites.",
+  },
+  {
+    title: "Medicion y presupuesto",
+    brief: "Recibis una propuesta completa antes de empezar.",
+    body: "Tomamos medidas, recomendamos materiales y te enviamos un presupuesto detallado para que tengas claridad sobre alcance, tiempos y costo final.",
   },
 ] as const;
 
@@ -136,6 +160,21 @@ export default function Home() {
 
   const selectedTab = galleryTabs.find((tab) => tab.key === activeTab) ?? galleryTabs[0];
   const marqueeClients = [...clients, ...clients];
+  const activeReview = reviewModalIndex !== null ? reviews[reviewModalIndex] : null;
+  const allBenefits = [
+    ...benefits.map((benefit, index) => ({
+      title: benefit.title,
+      description: benefit.description,
+      iconGroup: "main" as const,
+      iconIndex: index,
+    })),
+    ...extraInfo.map((item, index) => ({
+      title: item.title,
+      description: item.brief,
+      iconGroup: "extra" as const,
+      iconIndex: index,
+    })),
+  ];
 
   const whatsappHref = useMemo(() => {
     const message = encodeURIComponent(
@@ -143,6 +182,13 @@ export default function Home() {
     );
     return `https://wa.me/${contactConfig.whatsappNumber}?text=${message}`;
   }, []);
+
+  const scrollToGallery = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    const section = document.getElementById("gallery");
+    if (!section) return;
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const baseText = theme === "dark" ? "text-zinc-100" : "text-zinc-900";
   const mutedText = theme === "dark" ? "text-zinc-300" : "text-zinc-700";
@@ -174,8 +220,8 @@ export default function Home() {
         <div className={`rounded-2xl border px-4 py-3 md:px-6 ${glassPanel}`}>
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className={`text-xs tracking-[0.22em] `}>NUEVOS ESPACIOS</p>
-              <p className="mt-1 text-sm font-semibold">CABA, Buenos Aires</p>
+              <p className={`text-md tracking-[0.22em] `}>NUEVOS ESPACIOS</p>
+              <p className="mt-1 text-md font-semibold">CABA, Buenos Aires</p>
             </div>
             <div className="flex items-center gap-2">
               <a
@@ -199,34 +245,37 @@ export default function Home() {
       </header>
 
       <main className="mt-8">
-        <section className="py-[clamp(3.3rem,7vw,6.2rem)]">
-          <div className="mx-auto w-[min(1140px,92vw)]">
+        <section className="my-16">
+          <div className="mx-auto w-[90%] lg:w-[70%] max-w-[1400px]">
             <div
               className={`relative overflow-hidden rounded-3xl border px-5 py-16 md:px-10 md:py-24 border-white/15 shadow-[0_24px_58px_-24px_rgba(255,255,255,0.38)]`}
             >
-              <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(8,19,12,0.72),rgba(18,12,21,0.58)),radial-gradient(circle_at_18%_50%,rgba(113,194,126,0.38),transparent_48%),radial-gradient(circle_at_86%_20%,rgba(204,142,198,0.25),transparent_40%)]" />
+              <div className="w-full absolute inset-0 bg-[linear-gradient(120deg,rgba(8,19,12,0.72),rgba(18,12,21,0.58)),radial-gradient(circle_at_18%_50%,rgba(113,194,126,0.38),transparent_48%),radial-gradient(circle_at_86%_20%,rgba(204,142,198,0.25),transparent_40%)]" />
               <div className="absolute inset-y-0 left-0 w-1/2 overflow-hidden">
                 <img
                   src="/hero.png"
                   alt="Hero Nuevos Espacios"
-                  className="h-full w-full object-cover z-100"
+                  className="h-full w-full object-cover z-100 hidden md:block"
                 />
               </div>
-              <div className="relative z-10 grid md:grid-cols-2">
+              <div className="relative w-full z-10 w-full md:w-[102%] grid md:grid-cols-2 ">
                 <div />
-                <div className="space-y-5 text-center md:text-right">
+                <div className="space-y-7 text-center md:text-right p-6">
                   <span className={`inline-flex rounded-full border px-3 py-1 text-sm ${card}`}>
                     Jardines verticales artificiales
                   </span>
+                  <h1 className="text-5xl font-semibold leading-tight -mb-4 text-white md:text-7xl">
+                    Nuevos
+                  </h1>
                   <h1 className="text-5xl font-semibold leading-tight text-white md:text-7xl">
-                    Nuevos Espacios
+                    Espacios
                   </h1>
                   <p className="text-base leading-relaxed text-white/85 md:ml-auto md:max-w-xl md:text-lg">
                     Creamos paredes verdes modernas con instalacion profesional en CABA y GBA.
                     Tambien trabajamos plantas artificiales y cesped sintetico para proyectos
                     residenciales y comerciales.
                   </p>
-                  <div className="h-[2px] w-[72px] bg-gradient-to-r from-emerald-500 to-fuchsia-300 md:ml-auto" />
+                  <div className="h-[2px] w-full bg-gradient-to-r from-emerald-500 to-fuchsia-300 md:ml-auto" />
                   <div className="flex flex-wrap justify-center gap-3 md:justify-end">
                     <a
                       href={whatsappHref}
@@ -238,6 +287,7 @@ export default function Home() {
                     </a>
                     <a
                       href="#gallery"
+                      onClick={scrollToGallery}
                       className={`rounded-full border px-6 py-3 text-sm font-semibold ${card}`}
                     >
                       Ver galeria
@@ -255,31 +305,28 @@ export default function Home() {
             <div className="mb-6">
               <p className={`text-xs tracking-[0.18em] text-zinc-100`}>VENTAJAS</p>
               <h2 className="mt-2 text-3xl font-semibold text-zinc-100">
-                Estetica limpia, impacto inmediato y cero mantenimiento complejo
+                Espacios verdes con presencia, cuidado simple y atencion cercana
               </h2>
             </div>
-            <div className="grid gap-4 md:grid-cols-3">
-              {benefits.map((benefit) => (
-                <article key={benefit.title} className={`rounded-2xl border p-5 ${card}`}>
-                  <h3 className="text-2xl font-semibold">{benefit.title}</h3>
-                  <p className={`mt-3 text-sm leading-relaxed ${mutedText}`}>{benefit.description}</p>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {allBenefits.map((item) => {
+                const Icon =
+                  item.iconGroup === "main"
+                    ? mainBenefitIcons[item.iconIndex]
+                    : extraBenefitIcons[item.iconIndex];
+
+                return (
+                <article key={item.title} className={`grid h-full grid-cols-[88px_1fr] gap-4 rounded-2xl items-center border p-5 ${card}`}>
+                  <span className="grid h-20 w-20 place-items-center rounded-2xl border border-white/20 bg-white/10 text-white">
+                    {Icon ? <Icon className="h-10 w-10" aria-hidden="true" /> : null}
+                  </span>
+                  <div>
+                    <h3 className="text-2xl font-semibold">{item.title}</h3>
+                    <p className={`mt-3 text-sm leading-relaxed ${mutedText}`}>{item.description}</p>
+                  </div>
                 </article>
-              ))}
-            </div>
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
-              {extraInfo.map((item, index) => (
-                <article key={item.title} className={`rounded-2xl border p-5 ${card}`}>
-                  <h3 className="text-2xl font-semibold">{item.title}</h3>
-                  <p className={`mt-3 text-sm leading-relaxed ${mutedText}`}>{item.brief}</p>
-                  {/* <button
-                    type="button"
-                    onClick={() => setInfoModalIndex(index)}
-                    className={`mt-4 rounded-full border px-3 py-1 text-sm ${card}`}
-                  >
-                    Ver detalle
-                  </button> */}
-                </article>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
@@ -428,21 +475,35 @@ export default function Home() {
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {reviews.map((review, index) => (
-                <article key={review.author} className={`rounded-2xl border p-5 ${card}`}>
-                  <p className="text-lg tracking-[0.2em] text-amber-400">*****</p>
-                  <h3 className="mt-2 text-2xl font-semibold">{review.summary}</h3>
-                  <p className={`mt-3 max-h-16 overflow-hidden text-sm leading-relaxed ${mutedText}`}>
-                    {review.body}
-                  </p>
-                  <div className="mt-4 flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold">{review.author}</p>
-                    <button
-                      type="button"
-                      onClick={() => setReviewModalIndex(index)}
-                      className={`rounded-full border px-3 py-1 text-sm ${card}`}
-                    >
-                      Ver completa
-                    </button>
+                <article key={review.author} className={`rounded-2xl border ${card}`}>
+    
+          <div className="w-full max-w-[560px] rounded-2xl bg-[#f1f3f4]  p-5 text-[#202124] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.5)] md:p-6">
+            <div className="mb-3 flex flex-col  items-center justify-between">
+
+
+            <div className="mt-3  self-start flex items-center gap-4">
+              <span className="grid  h-12 w-12 place-items-center rounded-full border border-[#9aa0a6] text-[13px] font-semibold text-[#5f6368]">
+                {review.author
+                  .split(" ")
+                  .map((chunk) => chunk[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </span>
+              <div>
+                <p className="text-base font-medium text-[#202124]">{review.author}</p>
+                <p className="text-[23px] leading-none tracking-[0.12em] text-[#f9ab00]">
+                  {"*".repeat(review.rating)}
+                </p>
+              </div>
+            </div>
+                 <p className="mt-4 text-sm leading-relaxed text-[#202124]">{review.body}</p>
+ 
+
+                        <div className="mt-4 flex justify-end"> 
+
+                      </div>
+                    </div>
                   </div>
                 </article>
               ))}
@@ -501,27 +562,21 @@ export default function Home() {
       </main>
 
       {galleryModalIndex !== null && (
-        <div className="fixed inset-0 z-40 grid place-items-center bg-black/65 p-4">
-          <div className={`w-full max-w-2xl rounded-3xl border p-6 ${card}`}>
-            <h3 className="text-3xl font-semibold">{selectedTab.images[galleryModalIndex].name}</h3>
-            <p className={`mt-2 text-sm ${mutedText}`}>
-              Proyecto ejemplo de {selectedTab.label.toLowerCase()}.
-            </p>
-            <div className="relative mt-5 h-80 overflow-hidden rounded-2xl">
-              <img
-                src={selectedTab.images[galleryModalIndex].src}
-                alt={selectedTab.images[galleryModalIndex].name}
-                className="h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/18" />
-            </div>
-            <button
-              type="button"
-              onClick={() => setGalleryModalIndex(null)}
-              className={`mt-5 rounded-full border px-4 py-2 text-sm ${card}`}
-            >
-              Cerrar
-            </button>
+        <div className="fixed inset-0 z-40 bg-black/90 px-4 py-6">
+          <button
+            type="button"
+            onClick={() => setGalleryModalIndex(null)}
+            className="absolute top-4 right-4 z-10 grid h-10 w-10 place-items-center rounded-full bg-black/55 text-lg text-white transition hover:bg-black/75"
+            aria-label="Cerrar imagen"
+          >
+            x
+          </button>
+          <div className="grid h-full w-full place-items-center">
+            <img
+              src={selectedTab.images[galleryModalIndex].src}
+              alt={selectedTab.images[galleryModalIndex].name}
+              className="max-h-full w-full object-contain"
+            />
           </div>
         </div>
       )}
@@ -542,23 +597,63 @@ export default function Home() {
         </div>
       )}
 
-      {reviewModalIndex !== null && (
-        <div className="fixed inset-0 z-40 grid place-items-center bg-black/65 p-4">
-          <div className={`w-full max-w-xl rounded-3xl border p-6 ${card}`}>
-            <p className="text-sm tracking-[0.16em] text-amber-400">*****</p>
-            <h3 className="mt-2 text-3xl font-semibold">{reviews[reviewModalIndex].summary}</h3>
-            <p className={`mt-4 leading-relaxed ${mutedText}`}>{reviews[reviewModalIndex].body}</p>
-            <div className="mt-5 flex items-center justify-between">
-              <p className="font-semibold">{reviews[reviewModalIndex].author}</p>
-              <p className={`text-sm ${mutedText}`}>{reviews[reviewModalIndex].source}</p>
+      {activeReview && (
+        <div className="fixed inset-0 z-40 grid place-items-center bg-black/65 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-[560px] rounded-2xl bg-[#f1f3f4] p-5 text-[#202124] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.5)] md:p-6">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="w-8" />
+              <p className="text-center text-[36px] leading-none tracking-[-0.03em] text-[#5f6368]">
+                Googleplex
+              </p>
+              <button
+                type="button"
+                onClick={() => setReviewModalIndex(null)}
+                className="grid h-8 w-8 place-items-center rounded-full text-lg text-[#5f6368] transition hover:bg-black/5"
+                aria-label="Cerrar modal de reseña"
+              >
+                x
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setReviewModalIndex(null)}
-              className={`mt-6 rounded-full border px-4 py-2 text-sm ${card}`}
-            >
-              Cerrar
-            </button>
+
+            <div className="mt-3 flex items-center gap-3">
+              <span className="grid h-12 w-12 place-items-center rounded-full border border-[#9aa0a6] text-[13px] font-semibold text-[#5f6368]">
+                {activeReview.author
+                  .split(" ")
+                  .map((chunk) => chunk[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </span>
+              <div>
+                <p className="text-base font-medium text-[#202124]">{activeReview.author}</p>
+                <p className="text-[23px] leading-none tracking-[0.12em] text-[#f9ab00]">
+                  {"*".repeat(activeReview.rating)}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-2 flex items-center gap-2 text-sm text-[#5f6368]">
+              <p>El contenido sera publico</p>
+              <span className="grid h-4 w-4 place-items-center rounded-full border border-[#9aa0a6] text-[11px]">
+                i
+              </span>
+            </div>
+
+            <div className="mt-4 rounded-t-md bg-[#e8eaed] px-4 pt-3 pb-6">
+              <p className="text-sm text-[#5f6368]">Comparte detalles de tu experiencia en este sitio</p>
+              <p className="mt-2 text-sm leading-relaxed text-[#202124]">{activeReview.body}</p>
+            </div>
+            <div className="h-[2px] w-full bg-[#1a73e8]" />
+
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setReviewModalIndex(null)}
+                className="rounded-full border border-[#dadce0] bg-white px-4 py-2 text-sm font-medium text-[#1a73e8] transition hover:bg-[#f8f9fa]"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}

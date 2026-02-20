@@ -15,19 +15,24 @@ export const contactConfig = {
 
 export const benefits = [
   {
-    title: "Estetica todo el ano",
+    title: "Estetica cuidada todo el ano",
     description:
-      "Ambientes siempre verdes, sin poda ni riego, ideales para interiores, balcones y locales comerciales.",
+      "Tu espacio se ve verde y ordenado durante todo el ano, sin esfuerzo diario.",
   },
   {
-    title: "Instalacion profesional",
+    title: "Instalacion con acompanamiento",
     description:
-      "Asesoramiento y colocacion para que cada pared o espacio quede prolijo, resistente y listo para disfrutar.",
+      "Trabajamos con prolijidad, respetando tiempos y cuidando cada detalle del lugar.",
   },
   {
-    title: "Bajo mantenimiento",
+    title: "Mantenimiento simple",
     description:
-      "Materiales durables con minima limpieza y excelente presencia visual en hogares y proyectos corporativos.",
+      "Los materiales son durables y faciles de limpiar para que disfrutes el resultado por mas tiempo.",
+  },
+  {
+    title: "Formas de pago flexibles",
+    description:
+      "Ofrecemos cuotas y opciones de pago para adaptarnos mejor a tu proyecto.",
   },
 ] as const;
 
@@ -115,3 +120,4 @@ export const reviews = [
     source: "Google",
   },
 ] as const;
+
